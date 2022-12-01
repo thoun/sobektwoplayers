@@ -778,8 +778,11 @@ class SobekTwoPlayers extends Table
 		// Does this slot exist?
 		// Apply automatically, or go to appropriate state?
 		
-		// You have seen the pirogues
-		self::DbQuery( "UPDATE `player` SET `player_seen_pirogues` = 1 WHERE player_id = $player_id");
+		$state = $this->gamestate->state();
+		if ($state['name'] != 'characterArchitect') {
+			// You have seen the pirogues
+			self::DbQuery( "UPDATE `player` SET `player_seen_pirogues` = 1 WHERE player_id = $player_id");
+		}
 		
 		$pirogue = Pirogue::get($slot);
 		if (! isset($pirogue)) {
@@ -787,7 +790,6 @@ class SobekTwoPlayers extends Table
 		}
 		
 		// Depending on mode, must be in a slot
-		$state = $this->gamestate->state();
 		if ($state['name'] == 'pirogue') {
 			if ($pirogue["location"] != 'slot') {
 				throw new BgaVisibleSystemException( "That Pirogue is not in a slot." );

@@ -39,15 +39,6 @@ $game_options = [
         ],
         'default' => 1,
         'level' => 'major',
-        'startcondition' => [
-            2 => [
-                [ 
-                    'type' => 'minplayers',
-                    'value' => 9,
-                    'message' => 'Soon',
-                ] 
-            ],
-        ],
     ],
 
 ];

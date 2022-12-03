@@ -176,13 +176,14 @@ class SobekTwoPlayers extends Table {
 				$players[$player_id]['debens'] = $debens;
 			}
 			$players[$player_id]['deben_count'] = count($debens);
-			
-			
-			$royalCorruptions = RoyalCorruption::getOwned( $player_id );
-			if ($player_id == self::getCurrentPlayerId() || $game_ended) {
-				$players[$player_id]['royalCorruptions'] = $royalCorruptions;
+
+			if ($isTreasuresOfThePharaohExpansion) {
+				$royalCorruptions = RoyalCorruption::getOwned( $player_id );
+				if ($player_id == self::getCurrentPlayerId() || $game_ended) {
+					$players[$player_id]['royalCorruptions'] = $royalCorruptions;
+				}
+				$players[$player_id]['royalCorruption_count'] = count($royalCorruptions);
 			}
-			$players[$player_id]['royalCorruption_count'] = count($royalCorruptions);
 			
 			$players[$player_id]['sold'] = Tile::getSold($player_id);
 			

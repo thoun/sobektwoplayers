@@ -61,7 +61,7 @@ class SobekTwoPlayers extends Table {
 		
 		// Is this many queries slow??
 		
-		$starting_tiles = Tile::getDeck('starting');
+		$starting_tiles = Tile::getDeck(true);
 		// - 4 starting tiles for centre of board
 		for ($col = 2; $col <= 3; $col++) {
 			for ($row = 2; $row <= 3; $row++) {
@@ -163,6 +163,7 @@ class SobekTwoPlayers extends Table {
 			$players[$player_id]['hand_starting_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'starting'));
 			$players[$player_id]['hand_good_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'good'));
 			$players[$player_id]['hand_character_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'character'));
+			$players[$player_id]['hand_pharaoh_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'pharaoh'));
 			
 			$corruption = Tile::getCorruption( $player_id );
 			if ($player_id == self::getCurrentPlayerId()) {
@@ -175,6 +176,13 @@ class SobekTwoPlayers extends Table {
 				$players[$player_id]['debens'] = $debens;
 			}
 			$players[$player_id]['deben_count'] = count($debens);
+			
+			
+			$royalCorruptions = RoyalCorruption::getOwned( $player_id );
+			if ($player_id == self::getCurrentPlayerId() || $game_ended) {
+				$players[$player_id]['royalCorruptions'] = $royalCorruptions;
+			}
+			$players[$player_id]['royalCorruption_count'] = count($royalCorruptions);
 			
 			$players[$player_id]['sold'] = Tile::getSold($player_id);
 			
@@ -209,6 +217,9 @@ class SobekTwoPlayers extends Table {
 			'row' => self::getGameStateValue( 'ankh_row' ),
 			'dir' => self::getAnkhDir()
 		);
+
+		$result['treasuresOfThePharaohExpansion'] = $isTreasuresOfThePharaohExpansion;
+		$result['playedCharacters'] = Tile::getPlayedCharacters();
 
 		return $result;
 	}
@@ -281,9 +292,10 @@ class SobekTwoPlayers extends Table {
 	
 	function redactCharacters( &$tiles ) {
 		foreach ($tiles as $key => $tile) {
-			if ($tile['deck'] == 'character') {
+			if ($tile['deck'] == 'character' || $tile['deck'] == 'pharaoh') {
 				$tiles[$key]['ability'] = null;
 				$tiles[$key]['resource'] = null;
+				$tiles[$key]['displayed_resource'] = null;
 				$tiles[$key]['statue'] = 0;
 			}
 		}
@@ -319,7 +331,7 @@ class SobekTwoPlayers extends Table {
 			}
 		}
 		
-		$resource = null;
+		$resources = null;
 		$tiles = array();
 		foreach ($tile_ids as $tile_id) {
 			$tile = Tile::get($tile_id);
@@ -330,18 +342,21 @@ class SobekTwoPlayers extends Table {
 			if ($state['name'] != 'characterScribe') {
 				if ($tile['statue'] == 1) {
 					//
-				} else if ($resource == null) {
-					$resource = $tile["resource"];
+				} else if ($resources == null) {
+					$resources = explode('-or-', $tile["resource"]);
 				} else {
-					if ($resource != $tile["resource"]) {
+					$otherResources = explode('-or-', $tile["resource"]);
+					$resources = array_values(array_filter($resources, fn($resource) => in_array($resource, $otherResources) ));
+
+					if (count($resources) == 0) {
 						throw new BgaUserException( self::_("You must sell tiles of the same resource.") );
 					}
 				}
 			}
-		}
+		}	
 		
 		if ($state['name'] == 'characterScribe') {
-			self::DbQuery('UPDATE tile SET location = \'corruption\' WHERE tile_id IN ('.join($tile_ids, ',').')');
+			self::DbQuery('UPDATE tile SET location = \'corruption\' WHERE tile_id IN ('.join(',', $tile_ids).')');
 			self::notifyHandChange($player_id);
 			self::notifyAllPlayers( "discardTile", clienttranslate('${player_name} discards ${num} tiles'), array(
 				'player_id' => $player_id,
@@ -353,30 +368,36 @@ class SobekTwoPlayers extends Table {
 			
 			$this->gamestate->nextState( "next" );
 		} else {
-			if ($resource == null || $state['name'] == 'characterCourtesan') {
+			if ($resources == null || $state['name'] == 'characterCourtesan') {
 				// Need to add onto another set...
 				$sold = Tile::getSold($player_id);
-				if ($resource == null) {
+				if ($resources == null) {
 					// Only statues - any sold set is fine
 					if (count($sold) == 0) {
 						throw new BgaUserException( self::_("You cannot sell only statues if there are no sold sets to add onto") );
 					}
 				} else {
 					// Courtesan - need a matching sold set
-					$found = false;
+					$found = [];
 					foreach ($sold as $s) {
-						if ($s["resource"] == $resource) {
-							$found = true;
+						if (in_array($s["resource"], $resources)) {
+							$found[] = $s["resource"];
 							break;
 						}
 					}
-					if (! $found) {
+					if (count($found) == 0) {
 						throw new BgaUserException( self::_("You must add onto an existing sold set") );
+					} else if (count($found) > 1) {
+						throw new BgaUserException( self::_("No clearly defined type") );
 					}
 				}
+			} else {
+				if (count($resources) > 1) {
+					throw new BgaUserException( self::_("No clearly defined type") );
+				}	
 			}
 			
-			self::DbQuery('UPDATE tile SET just_sold = 1 WHERE tile_id IN ('.join($tile_ids, ',').')');
+			self::DbQuery('UPDATE tile SET just_sold = 1 WHERE tile_id IN ('.join(',', $tile_ids).')');
 			
 			$this->gamestate->nextState( "pickResource" );
 		}
@@ -401,26 +422,41 @@ class SobekTwoPlayers extends Table {
 		if (! isset($tile)) {
 			throw new BgaVisibleSystemException( "Tile doesn't exist." );
 		}
-		if ($tile["location"] != "hand" || $tile["player_id"] != $player_id) {
-			throw new BgaVisibleSystemException( "You can only play tiles in your hand." );
-		}
+
 		if ($tile["deck"] != "character") {
 			throw new BgaVisibleSystemException( "That is not a character tile." );
 		}
-		
-		$ability = $tile["ability"];
-		$padability = "10";
-		if ($ability < 10) {
-			$padability = "0" . $ability;	
+
+		$state = $this->gamestate->state();
+		if ($state['name'] == 'characterSpy') {
+			if ($tile["location"] != "played") {
+				throw new BgaVisibleSystemException( "You can only play characters that were already played." );
+			}
+		} else {
+			if ($tile["location"] != "hand" || $tile["player_id"] != $player_id) {
+				throw new BgaVisibleSystemException( "You can only play tiles in your hand." );
+			}
 		}
 		
-		Tile::discard($tile);
-		self::notifyAllPlayers( "discardTile", clienttranslate('${player_name} plays a Character: ${image}'), array(
-			'player_id' => $player_id,
-			'player_name' => self::getActivePlayerName(),
-			'tile' => $tile,
-			'image' => '<div class="sprite sprite-tile sprite-character-'.$padability.'"></div>'
-		));
+		$ability = $tile["ability"];
+		$padability = str_pad($ability, 2, "0", STR_PAD_LEFT);
+		
+		Tile::discardPlayedCharacter($tile);
+		
+		if ($state['name'] == 'characterSpy') {
+			self::notifyAllPlayers( "log", clienttranslate('${player_name} applies the ability of: ${image}'), [
+				'player_name' => self::getActivePlayerName(),
+				'image' => '<div class="sprite sprite-tile sprite-character-'.$padability.'"></div>'
+			]);
+		} else {
+			self::notifyAllPlayers( "discardTile", clienttranslate('${player_name} plays a Character: ${image}'), array(
+				'player_id' => $player_id,
+				'player_name' => self::getActivePlayerName(),
+				'tile' => $tile,
+				'playedCharacted' => true,
+				'image' => '<div class="sprite sprite-tile sprite-character-'.$padability.'"></div>'
+			));
+		}
 		
 		// Do different things depending on the ability...
 		$transition = "next";
@@ -478,6 +514,38 @@ class SobekTwoPlayers extends Table {
 		} else if ($ability == 9 || $ability == 10) {
 			// Opponent must discard down to 6 tiles in hand (extras to corruption)
 			$transition = "characterScribe";
+		} else if ($ability == 11) {
+			$royalCorruptions = RoyalCorruption::getOwned($player_id);
+
+			if (count($royalCorruptions) > 0) {
+				$discardedRoyalCorruption = $royalCorruptions[0];
+				// we take the royal corruption token with the highest value
+				foreach($royalCorruptions as $royalCorruption) {
+					if (intval($royalCorruption['value']) > intval($discardedRoyalCorruption['value'])) {
+						$discardedRoyalCorruption = $royalCorruption;
+					}
+				}
+
+				self::DbQuery("UPDATE `royal_corruption` SET `location`='discard' WHERE `royal_corruption_id` = $discardedRoyalCorruption[royal_corruption_id]");
+
+				self::notifyPlayer( $player_id, "discardRoyalCorruption", '', array(
+					'player_id' => $player_id,
+					'royalCorruption' => $discardedRoyalCorruption,
+				));
+				
+				self::notifyAllPlayers( "discardRoyalCorruption", '', array(
+					'player_id' => $player_id,
+				));
+			} else {
+				self::notifyAllPlayers("log", clienttranslate('There is no royal corruption token to discard'), []);
+			}
+		} else if ($ability == 12) {
+			$playedCharacters = Tile::getPlayedCharacters();
+			if (count($playedCharacters) > 0) {
+				$transition = "characterSpy";
+			} else {
+				self::notifyAllPlayers("log", clienttranslate('There is no previously played character'), []);
+			}
 		}
 				
 		// Play character!
@@ -531,6 +599,12 @@ class SobekTwoPlayers extends Table {
 				)
 			)
 		);
+	}
+
+	function argCharacterSpy() {
+		return [
+			'playedCharacters' => Tile::getPlayedCharacters(),
+		];
 	}
 	
 	function answer($answer) {
@@ -607,11 +681,20 @@ class SobekTwoPlayers extends Table {
 		{
 			if ($answer == "wheat" || $answer == "ebony" || $answer == "ivory" || $answer == "marble" || $answer == "fish" || $answer == "livestock") {
 				$just_sold = self::getObjectList('SELECT * FROM tile WHERE just_sold = 1');
+				$onlyStatues = true;
 				foreach ($just_sold as $k => $v) {
+					if ($just_sold[$k]['statue'] != 1) {
+						$onlyStatues = false;
+					}
 					$just_sold[$k]['resource'] = $answer;
 					$just_sold[$k]['just_sold'] = 0;
 					$just_sold[$k]['location'] = 'sold';
 				}
+
+				if ($onlyStatues && intval(self::getUniqueValueFromDB("SELECT count(*) FROM tile WHERE location = 'sold' AND resource = '$answer'")) == 0) {
+					throw new BgaUserException( self::_("You must add onto an existing sold set") );
+				}
+
 				self::notifyAllPlayers( "sold", clienttranslate('${player_name} sells some tiles'), array(
 					'player_id' => $player_id,
 					'player_name' => self::getActivePlayerName(),
@@ -673,6 +756,46 @@ class SobekTwoPlayers extends Table {
 				// Urm...
 				throw new BgaVisibleSystemException( "Invalid answer." );
 			}
+		} else if ($state['name'] == "pirogue11")
+		{
+			if ($answer == "marble" || $answer == "ebony") {
+				$sold = Tile::getSold($player_id);
+				$found = false;
+				foreach ($sold as $t) {
+					if ($t['resource'] == $answer) {
+						$found = true;
+						break;
+					}
+				}
+				if (! $found) {
+					throw new BgaUserException( self::_("You have no sold sets of that type") );
+				} else {
+					// Move the pirogue there, and update score
+					$pirogue = Pirogue::get( self::getGameStateValue( 'just_picked_pirogue' ) );
+					self::DbQuery("UPDATE pirogue SET location='soldset', resource='$answer', player_id=$player_id WHERE pirogue_id=$pirogue[pirogue_id]");
+					$pirogue['location'] = 'soldset';
+					$pirogue['resource'] = $answer;
+					$pirogue['player_id'] = $player_id;
+					self::notifyAllPlayers( "takePirogue", '', array(
+						'pirogue' => $pirogue,
+						'discard' => true,
+						'soldset' => true,
+					));
+					
+					// Update player score...
+					$score = self::getPlayerResourceScore($player_id);
+					self::dbSetScore($player_id, $score['score']);
+					self::notifyAllPlayers( "updateScores", '', array(
+						'player_id' => $player_id,
+						'resource_score' => $score
+					));
+					
+					$this->gamestate->nextState( 'next' );
+				}
+			} else {
+				// Urm...
+				throw new BgaVisibleSystemException( "Invalid answer." );
+			}
 		} else if ($state['name'] == "characterHighPriest")
 		{
 			if ($answer == "statue" || $answer == "wheat" || $answer == "ebony" || $answer == "ivory" || $answer == "marble" || $answer == "fish" || $answer == "livestock") {
@@ -680,7 +803,7 @@ class SobekTwoPlayers extends Table {
 				if ($answer == "statue") {
 					$to_remove = self::getObjectList("SELECT * FROM tile WHERE location = 'corruption' AND player_id = $player_id AND statue");
 				} else {
-					$to_remove = self::getObjectList("SELECT * FROM tile WHERE location = 'corruption' AND player_id = $player_id AND resource = '$answer'");
+					$to_remove = self::getObjectList("SELECT * FROM tile WHERE location = 'corruption' AND player_id = $player_id AND resource like '%$answer%'");
 				}
 				
 				$to_remove_ids = [];
@@ -744,7 +867,7 @@ class SobekTwoPlayers extends Table {
 			$this->gamestate->nextState( "next" );
 		} else if ($state['name'] == "characterThief")
 		{
-			if ($answer == "good" || $answer == "starting" || $answer == "character") {
+			if ($answer == "good" || $answer == "starting" || $answer == "character" || $answer == "pharaoh") {
 				$target_player_id = self::getPlayerAfter($player_id);
 				
 				// Get a random card of this type from opponent's hand...
@@ -804,6 +927,8 @@ class SobekTwoPlayers extends Table {
 			throw new BgaVisibleSystemException( "That Pirogue does not exist." );
 		}
 		
+		$players = self::loadPlayersBasicInfos();
+		
 		// Depending on mode, must be in a slot
 		if ($state['name'] == 'pirogue') {
 			if ($pirogue["location"] != 'slot') {
@@ -825,6 +950,7 @@ class SobekTwoPlayers extends Table {
 		$discard = false;
 		$transition = "next";
 		$message = '';
+		$messageArgs = [];
 		$num = 0;
 		
 		if ($ability == 1 || $ability == 2) {
@@ -911,17 +1037,43 @@ class SobekTwoPlayers extends Table {
 					'player_name' => self::getActivePlayerName()
 				));
 			}
+		} else if ($ability == 10) {
+			$discard = true;
+			$opponentId = self::getPlayerAfter($player_id);
+			$opponentDebens = Deben::getOwned($opponentId);
+
+			$message = clienttranslate('${player_name} takes a Pirogue token and makes ${player_name2} randomly discard 1 Deben token: ${image}');
+			$messageArgs['player_name2'] = $players[$opponentId]["player_name"];
+
+			if (count($opponentDebens) > 0) {
+				$discardedDeben = $opponentDebens[bga_rand(0, count($opponentDebens)-1)];
+				self::DbQuery("UPDATE `deben` SET `location`='discard' WHERE `deben_id` = $discardedDeben[deben_id]");
+
+				self::notifyPlayer( $opponentId, "discardDeben", '', array(
+					'player_id' => $opponentId,
+					'deben' => $discardedDeben,
+				));
+				
+				self::notifyAllPlayers( "discardDeben", '', array(
+					'player_id' => $opponentId,
+				));
+			} else {
+				self::notifyAllPlayers("log", clienttranslate('There is no deben to discard'), []);
+			}
+		} else if ($ability == 11) {
+			// Counts as 2 scarabs for wheat/fish/livestock (sold set)
+			$message = clienttranslate('${player_name} takes a Pirogue token: ${image}');
+			self::setGameStateValue( 'just_picked_pirogue', $pirogue["pirogue_id"] );
+			$transition = "pirogue11";
 		} else {
 			throw new BgaVisibleSystemException( "Unrecognised Pirogue ability." );
 		}
-		
-		$players = self::loadPlayersBasicInfos();
 		
 		if ($target_player_id != null) {
 			self::DbQuery("UPDATE pirogue SET location='player', player_id='$target_player_id' WHERE pirogue_id=$pirogue[pirogue_id]");
 			$pirogue['location'] = 'player';
 			$pirogue['player_id'] = $target_player_id;
-			self::notifyAllPlayers( "takePirogue", $message, array(
+			self::notifyAllPlayers( "takePirogue", $message, $messageArgs + array(
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'pirogue' => $pirogue,
@@ -934,7 +1086,7 @@ class SobekTwoPlayers extends Table {
 			// Discard the token...
 			self::DbQuery("UPDATE pirogue SET location='discard' WHERE pirogue_id=$pirogue[pirogue_id]");
 			$pirogue['location'] = 'discard';
-			self::notifyAllPlayers( "takePirogue", $message, array(
+			self::notifyAllPlayers( "takePirogue", $message, $messageArgs + array(
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'player_name2' => '',
@@ -945,7 +1097,7 @@ class SobekTwoPlayers extends Table {
 			));
 		} else {
 			// State...
-			self::notifyAllPlayers( "takePirogue", $message, array(
+			self::notifyAllPlayers( "takePirogue", $message, $messageArgs + array(
 				'player_id' => $player_id,
 				'player_name' => self::getActivePlayerName(),
 				'player_name2' => '',
@@ -1020,6 +1172,23 @@ class SobekTwoPlayers extends Table {
 			
 			// Add to player's hand
 			Tile::giveToPlayer($tile, $player_id);
+
+			if ($tile["deck"] == 'pharaoh') {
+				// Draw a random Deben tile
+				$royalCorruption = RoyalCorruption::draw( $player_id );
+				
+				if ($royalCorruption == null) {
+					throw new BgaUserException( self::_("There are no Royal corruption tokens left") );
+				}
+				
+				self::notifyPlayer( $player_id, "royalCorruption", '', array(
+					'player_id' => $player_id,
+					'player_name' => self::getActivePlayerName(),
+					
+					'royalCorruption' => $royalCorruption,
+				));
+			}
+
 			$corruption_tiles_objects = [];
 			if ($state['name'] != 'characterMerchant') {
 				// Take corruption tiles
@@ -1076,8 +1245,8 @@ class SobekTwoPlayers extends Table {
 				// - if deben, deben choice
 				self::setGameStateValue( 'last_tile_taken', $tile['tile_id'] );
 				$this->gamestate->nextState( "deben" );
-			} else if ($tile["deck"] == 'character' && $state['name'] != 'characterMerchant') {
-				// - if character, direction choice
+			} else if (($tile["deck"] == 'character' || $tile["deck"] == 'pharaoh') && $state['name'] != 'characterMerchant') {
+				// - if character or pharaoh, direction choice
 				$this->gamestate->nextState( "orientation" );
 			} else {
 				// - otherwise, next player
@@ -1193,6 +1362,7 @@ class SobekTwoPlayers extends Table {
 	
 	function stFinalScoring() {
 		self::setGameStateValue( 'game_ended', 1 );
+		$isTreasuresOfThePharaohExpansion = $this->isTreasuresOfThePharaohExpansion();
 		
 		$player_id = self::getActivePlayerId();
 		$opponent_player_id = self::getPlayerAfter( $player_id );
@@ -1290,7 +1460,7 @@ class SobekTwoPlayers extends Table {
 		$total_and_tie_points = array();
 		foreach ($players as $pid => $p) {
 			// Reveal Debens to the other player
-			self::notifyPlayer( self::getPlayerAfter($pid), "revealDebens", '', array(
+			self::notifyAllPlayers("revealDebens", '', array(
 				'player_id' => $pid,
 				'debens' => Deben::getOwned($pid)
 			));
@@ -1302,6 +1472,20 @@ class SobekTwoPlayers extends Table {
 			$resource_points[$pid] = self::getPlayerResourceScore($pid);
 			// Add on pirogues...
 			$pirogues = Pirogue::getOwned($pid);
+
+			if ($isTreasuresOfThePharaohExpansion) {
+				$royalCorruptions = RoyalCorruption::getOwned($pid);
+				// Reveal royal corruption to the other player
+				self::notifyAllPlayers("revealRoyalCorruptions", '', array(
+					'player_id' => $pid,
+					'royalCorruptions' => $royalCorruptions,
+				));
+				// Add royal corruption
+				foreach ($royalCorruptions as $royalCorruption) {
+					$amount_corruption[$pid] += intval($royalCorruption['value']);
+				}
+			}
+
 			foreach ($pirogues as $pirogue) {
 				if ($pirogue['ability'] == 1) {
 					$amount_corruption[$pid] += 1;
@@ -1400,11 +1584,10 @@ class SobekTwoPlayers extends Table {
 	function makeImage($t, $inline = false) {
 		$inline_class = $inline ? "sprite-ib " : "";
 		if ($t['deck'] == 'character') {
-			if ($t['ability'] == 10) {
-				return '<div class="'.$inline_class.' sprite sprite-tile sprite-character-10"></div>';
-			} else {
-				return '<div class="'.$inline_class.' sprite sprite-tile sprite-character-0'.$t['ability'].'"></div>';
-			}
+			$padability = $t['ability'] == 0 ? '0' : str_pad($t['ability'], 2, "0", STR_PAD_LEFT);
+			return '<div class="'.$inline_class.' sprite sprite-tile sprite-character-'.$padability.'"></div>';
+		} else if ($t['deck'] == 'pharaoh') {
+			return '<div class="'.$inline_class.' sprite sprite-tile sprite-pharaoh-back"></div>';
 		} else if ($t['statue'] == 1) {
 			return '<div class="'.$inline_class.' sprite sprite-tile sprite-statue-'.$t['direction'].'"></div>';
 		} else {
@@ -1444,6 +1627,30 @@ class SobekTwoPlayers extends Table {
 		$found = false;
 		foreach ($sold as $t) {
 			if ($t['resource'] == 'fish' || $t['resource'] == 'livestock' || $t['resource'] == 'wheat') {
+				$found = true;
+				break;
+			}
+		}
+		if (! $found) {
+			// Discard the token! There is nowhere to put it
+			$pirogue = Pirogue::get( self::getGameStateValue( 'just_picked_pirogue' ) );
+			self::DbQuery("UPDATE pirogue SET location='discard' WHERE pirogue_id=$pirogue[pirogue_id]");
+			$pirogue['location'] = 'discard';
+			self::notifyAllPlayers( "takePirogue", clienttranslate('There is nowhere to put the Pirogue token, so it gets discarded'), array(
+				'pirogue' => $pirogue,
+				'discard' => true
+			));
+			$this->gamestate->nextState( 'next' );
+		}
+	}
+	
+	function stPirogue11() {
+		// If you have no relevant sold sets, next!
+		$player_id = self::getActivePlayerId();
+		$sold = Tile::getSold($player_id);
+		$found = false;
+		foreach ($sold as $t) {
+			if ($t['resource'] == 'marble' || $t['resource'] == 'ebony') {
 				$found = true;
 				break;
 			}
@@ -1528,13 +1735,22 @@ class SobekTwoPlayers extends Table {
 	
 	function stPickResource() {
 		$just_sold = self::getObjectList('SELECT * FROM tile WHERE just_sold = 1');
+
+		$resources = null;
+		foreach ($just_sold as $tile) {
+			if ($tile['statue'] == 1) {
+				//
+			} else if ($resources == null) {
+				$resources = explode('-or-', $tile["resource"]);
+			} else {
+				$otherResources = explode('-or-', $tile["resource"]);
+				$resources = array_values(array_filter($resources, fn($resource) => in_array($resource, $otherResources) ));
+			}
+		}
 		
 		// If there is any tile with a resource, pick automatically...
-		foreach ($just_sold as $tile) {
-			if (isset($tile['resource'])) {
-				self::answer($tile['resource']);
-				break;
-			}
+		if ($resources !== null && count($resources) == 1) {
+			self::answer($resources[0]);
 		}
 	}
 	
@@ -1698,6 +1914,13 @@ class SobekTwoPlayers extends Table {
 		);
 	}
 	
+	function argPirogue11() {
+		$pirogue = Pirogue::get( self::getGameStateValue( 'just_picked_pirogue' ) );
+		return array(
+			"pirogue" => $pirogue
+		);
+	}
+	
 	function argPlayerTurn() {
 		$pirogue_board = Pirogue::getBoard();
 		$player_id = self::getActivePlayerId();
@@ -1732,6 +1955,14 @@ class SobekTwoPlayers extends Table {
 				}
 				if (+$t["statue"]) {
 					$num_statues++;
+				} if ($t["deck"] == "pharaoh") {
+					$resources = explode('-or-', $t["resource"]);
+					foreach($resources as $r) {
+						if (! isset($num_per_resource[$r])) {
+							$num_per_resource[$r] = 0;
+						}
+						$num_per_resource[$r]++;
+					}
 				} else {
 					$r = $t["resource"];
 					if (! isset($num_per_resource[$r])) {
@@ -1795,6 +2026,7 @@ class SobekTwoPlayers extends Table {
 			'hand_starting_size' => count(array_filter($hand, function($t) {return $t['deck'] == 'starting';})),
 			'hand_good_size' => count(array_filter($hand, function($t) {return $t['deck'] == 'good';})),
 			'hand_character_size' => count(array_filter($hand, function($t) {return $t['deck'] == 'character';})),
+			'hand_pharaoh_size' => count(array_filter($hand, function($t) {return $t['deck'] == 'pharaoh';})),
 		));
 	}
 		

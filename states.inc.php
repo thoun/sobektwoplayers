@@ -31,6 +31,7 @@ $machinestates = array(
 			"characterMerchant" => 104,
 			"characterThief" => 103,
 			"characterVizier" => 102,
+			"characterSpy" => 112,
 			"gameEnd" => 98,
 		)
 	),
@@ -92,7 +93,7 @@ $machinestates = array(
 		"action" => "stPirogue",
 		"args" => "argPirogue",
 		"possibleactions" => array( "pickPirogue" ),
-		"transitions" => array( "next" => 10, "extraTurn" => 2, "pirogue04" => 7, "pirogue07" => 8 )
+		"transitions" => array( "next" => 10, "extraTurn" => 2, "pirogue04" => 7, "pirogue07" => 8, "pirogue11" => 9 )
 	),
 	
 	7 => array(
@@ -113,6 +114,17 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"action" => "stPirogue07",
 		"args" => "argPirogue07",
+		"possibleactions" => array( "answer" ),
+		"transitions" => array( "next" => 10 )
+	),
+	
+	9 => array(
+		"name" => "pirogue11",
+		"description" => clienttranslate('${actplayer} must choose a resource to add the Pirogue token to'),
+		"descriptionmyturn" => clienttranslate('${you} must choose a resource to add the Pirogue token to'),
+		"type" => "activeplayer",
+		"action" => "stPirogue11",
+		"args" => "argPirogue11",
 		"possibleactions" => array( "answer" ),
 		"transitions" => array( "next" => 10 )
 	),
@@ -178,7 +190,7 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"args" => "argCharacterArchitect",
 		"possibleactions" => array( "pickPirogue" ),
-		"transitions" => array( "next" => 10, "extraTurn" => 2, "pirogue04" => 7, "pirogue07" => 8 )
+		"transitions" => array( "next" => 10, "extraTurn" => 2, "pirogue04" => 7, "pirogue07" => 8, "pirogue11" => 9 )
 	),
 	109 => array(
 		"name" => "preCharacterScribe",
@@ -194,6 +206,25 @@ $machinestates = array(
 		"action" => "stCharacterScribe",
 		"possibleactions" => array( "sell" ),
 		"transitions" => array( "next" => 2 )
+	),
+	112 => array(
+		"name" => "characterSpy",
+		"description" => clienttranslate('${actplayer} must choose a character to play'),
+		"descriptionmyturn" => clienttranslate('${you} must choose a character to play'),
+		"type" => "activeplayer",
+		"args" => "argCharacterSpy",
+		"possibleactions" => array( "playCharacter" ),
+		"transitions" => array( "next" => 10, "pickResource" => 5, "deben" => 3, "orientation" => 4, "refill" => 25,
+			"characterScribe" => 109,
+			"characterArchitect" => 108,
+			"characterCourtesan" => 107,
+			"characterHighPriest" => 105,
+			"characterMerchant" => 104,
+			"characterThief" => 103,
+			"characterVizier" => 102,
+			"characterSpy" => 112,
+			"gameEnd" => 98,
+		)
 	),
 	
 	98 => array(

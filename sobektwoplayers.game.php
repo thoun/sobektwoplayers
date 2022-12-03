@@ -4,9 +4,12 @@ require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once('modules/sbk_tile.php');
 require_once('modules/sbk_deben.php');
 require_once('modules/sbk_pirogue.php');
+require_once('modules/sbk_royal_corruption.php');
+require_once('modules/sbk_debug.php');
 
-class SobekTwoPlayers extends Table
-{
+class SobekTwoPlayers extends Table {
+    use DebugUtilTrait;
+
 	function __construct( )
 	{
 		parent::__construct();
@@ -28,6 +31,8 @@ class SobekTwoPlayers extends Table
 			'game_ended' => 19,
 			
 			'tiles_taken' => 20,
+
+			'treasures_of_the_pharaoh_expansion' => 100,
 		) );
 	}
 	
@@ -43,11 +48,16 @@ class SobekTwoPlayers extends Table
 		// The number of colors defined here must correspond to the maximum number of players allowed for the gams
 		$gameinfos = self::getGameinfos();
 		$default_colors = $gameinfos['player_colors'];
+
+		$isTreasuresOfThePharaohExpansion = $this->isTreasuresOfThePharaohExpansion();
 		
 		// Initialise tiles deck
-		Tile::setup();
+		Tile::setup($isTreasuresOfThePharaohExpansion);
 		Deben::setup();
-		Pirogue::setup();
+		Pirogue::setup($isTreasuresOfThePharaohExpansion);
+		if ($isTreasuresOfThePharaohExpansion) {
+			RoyalCorruption::setup();
+		}
 		
 		// Is this many queries slow??
 		
@@ -93,7 +103,7 @@ class SobekTwoPlayers extends Table
 			$color = array_shift( $default_colors );
 			$values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
 		}
-		$sql .= implode( $values, ',' );
+		$sql .= implode(',', $values);
 		self::DbQuery( $sql );
 		self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
 		self::reloadPlayersBasicInfos();
@@ -129,9 +139,10 @@ class SobekTwoPlayers extends Table
 		$this->activeNextPlayer();
 	}
 		
-	protected function getAllDatas()
-	{
-		$result = array();
+	protected function getAllDatas() {
+		$isTreasuresOfThePharaohExpansion = $this->isTreasuresOfThePharaohExpansion();
+
+		$result = [];
 
 		$sql = "SELECT player_id id, player_score score, player_name name, player_seen_pirogues FROM player ";
 		$players = self::getCollectionFromDb( $sql );
@@ -149,9 +160,9 @@ class SobekTwoPlayers extends Table
 			$players[$player_id]['hand_size'] = count($hand);
 			
 			
-			$players[$player_id]['hand_starting_size'] = count(array_filter($hand, function($t) {return $t['deck'] == 'starting';}));
-			$players[$player_id]['hand_good_size'] = count(array_filter($hand, function($t) {return $t['deck'] == 'good';}));
-			$players[$player_id]['hand_character_size'] = count(array_filter($hand, function($t) {return $t['deck'] == 'character';}));
+			$players[$player_id]['hand_starting_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'starting'));
+			$players[$player_id]['hand_good_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'good'));
+			$players[$player_id]['hand_character_size'] = count(array_filter($hand, fn($t) => $t['deck'] == 'character'));
 			
 			$corruption = Tile::getCorruption( $player_id );
 			if ($player_id == self::getCurrentPlayerId()) {
@@ -201,6 +212,10 @@ class SobekTwoPlayers extends Table
 
 		return $result;
 	}
+
+    function isTreasuresOfThePharaohExpansion() {
+        return intval($this->getGameStateValue('treasures_of_the_pharaoh_expansion')) === 2;
+    }
 	
 	function getPlayerResourceScore($player_id) {
 		$sold = Tile::getSold($player_id);

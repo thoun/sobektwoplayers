@@ -1859,6 +1859,14 @@ class SobekTwoPlayers extends Table {
 		if ($from_version == "210505-1602") {
 			self::DbQuery( "ALTER TABLE `player` ADD `player_seen_pirogues` SMALLINT UNSIGNED NOT NULL DEFAULT '0'");
 		}
+
+		if ($from_version <= 2212031601) {
+			self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_tile` MODIFY COLUMN `resource` enum('ivory', 'ebony', 'marble', 'wheat', 'fish', 'livestock', 'fish-or-ebony', 'ebony-or-livestock', 'livestock-or-ivory', 'ivory-or-wheat', 'wheat-or-marble', 'marble-or-fish')");
+			self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_tile` ADD `displayed_resource` enum('ivory', 'ebony', 'marble', 'wheat', 'fish', 'livestock', 'fish-or-ebony', 'ebony-or-livestock', 'livestock-or-ivory', 'ivory-or-wheat', 'wheat-or-marble', 'marble-or-fish')");
+			self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_tile` MODIFY COLUMN `deck` enum('starting', 'good', 'character', 'pharaoh')");
+			self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_tile` MODIFY COLUMN `location` enum('discard', 'deck', 'board', 'hand', 'sold', 'corruption', 'played')");
+			self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_deben` MODIFY COLUMN `location` enum('bag', 'player', 'discard')");
+        }
 	}
 	
 	// Hacks

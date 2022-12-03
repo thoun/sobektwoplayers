@@ -46,16 +46,18 @@ function (dojo, declare, debounce, gamegui, setup, states, notifications, action
          let spriteName = '';
          if (tile.deck == 'character') {
             if (tile.ability != null) {
-               if (tile.ability == 10) {
-                  spriteName = 'sprite-character-10';
-               } else {
-                  spriteName = 'sprite-character-0' + +tile.ability;
-               }
+               spriteName = 'sprite-character-' + tile.ability.toString().padStart(2, '0');
             } else {
                spriteName = 'sprite-character-back';
             }
          } else if (+tile.statue) {
             spriteName = 'sprite-statue-' + tile.direction;
+         } else if (tile.deck == 'pharaoh') {
+            if (tile.displayed_resource != null) {
+               spriteName = `sprite-pharaoh sprite-${tile.displayed_resource}`;
+            } else {
+               spriteName = `sprite-pharaoh-back`;
+            }
          } else {
             spriteName = `sprite-${tile.resource}-${tile.direction}-${tile.scarabs > 0 ? 's' : 'x'}-${tile.deben > 0 ? 'd' : 'x'}`;
          }
@@ -92,13 +94,18 @@ function (dojo, declare, debounce, gamegui, setup, states, notifications, action
                desc = _("Keep this token, it grants you 2 points at the end of the game. Also, draw 1 additional Deben token and keep that too.");
             } else if (tile.ability == 9) {
                desc = _("Draw 2 Deben tokens and keep the higher one. Put the other back into the bag without revealing its value.");
+            } else if (tile.ability == 10) {
+               desc = _("Your opponent must randomly discard 1 Deben token among the ones they have.");
+            } else if (tile.ability == 11) {
+               desc = _("Place this token on one of your previously sold sets corresponding to one of the 2 types shown. It adds 2 Scarabs to this set at the end of the game during final score calculation. You may add this token to the ");
             }
+
             html = `${desc}`;
             this.addTooltipHtml( element.id, html );
          }
       },
-      addTooltipToTile: function(element) {
-         const tile = element.tile;
+      addTooltipToTile: function(element, tileInfos = null) {
+         const tile = element.tile || tileInfos;
          element.id = 'tooltip-id-' + this.tooltipIds;
          this.tooltipIds++;
          if (tile && tile.deck == 'character') {
@@ -133,6 +140,12 @@ function (dojo, declare, debounce, gamegui, setup, states, notifications, action
                } else if (tile.ability == 9 || tile.ability == 10) {
                   name = _("Scribe");
                   desc = _("If your opponent has more than 6 tiles in their hand, they must place tiles on their Corruption board until they only have 6 in their hand.");
+               } else if (tile.ability == 11) {
+                  name = _("Royal Adviser");
+                  desc = _("Discard 1 Royal corruption token of your choice among the ones you have.");
+               } else if (tile.ability == 12) {
+                  name = _("Spy");
+                  desc = _("Apply the ability of a Character tile of your choice, among the ones that have already been used for their ability during this game. So, you can not choose the ability of a character that has been sold within a set of goods.");
                }
                html = `<h3>${name}</h3>${desc}`;
                this.addTooltipHtml( element.id, html );

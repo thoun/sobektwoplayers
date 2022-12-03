@@ -44,7 +44,10 @@ function onClickHand( event ) {
 					// Deselect these if there any of a different type
 					for (let i = 0; i < preQuery.length; i++) {
 						if (+preQuery[i].tile.statue == 0) {
-							if (preQuery[i].tile.resource != event.target.tile.resource) {
+							const preQueryResources = preQuery[i].tile.resource.split('-or-');
+							const targetResources = event.target.tile.resource.split('-or-');
+							const sameResource = preQueryResources.some(preQueryResource => targetResources.includes(preQueryResource));
+							if (!sameResource) {
 								match = false;
 								break;
 							}
@@ -76,17 +79,24 @@ function onClickHand( event ) {
 	} else if ((this.stateName == "characterCourtesan" && (postQuery.length == 1 || postQuery.length == 2)) || 
 		(this.stateName != "characterCourtesan" && postQuery.length >= 3)) {
 		// Show "sell" only if there are tiles all of the same type
-		let type = null;
+		let types = null;
 		canSell = true;
 		for (let i = 0; i < postQuery.length; i++) {
 			if (+postQuery[i].tile.statue == 0) {
-				if (type == null) {
-					type = postQuery[i].tile.resource;
-				} else if (type != postQuery[i].tile.resource) {
-					canSell = false;
-					break;
+				if (types == null) {
+					types = postQuery[i].tile.resource.split('-or-');
+				} else {
+					postQueryTypes = postQuery[i].tile.resource.split('-or-');
+					types = types.filter(type => postQueryTypes.includes(type));
+					if (!types.length) {
+						canSell = false;
+						break;
+					}
 				}
 			}
+		}
+		if (types && types.length > 1) {
+			canSell = false;
 		}
 	}
 	
@@ -163,21 +173,25 @@ function onAnswer( event ) {
 function onPlayCharacter() {
 	dojo.stopEvent( event );
 	
+	const q = dojo.query('.sprite-tile.selected', $('sbk-my-hand'));
+
+	if (q.length == 1) {
+		playCharacter.bind(this)(q[0].tile.tile_id);
+	}
+}
+
+function playCharacter(tile_id) {	
 	if ( ! this.checkAction( 'playCharacter' ) ) {
 		return;
 	}
 	
-	const q = dojo.query('.sprite-tile.selected', $('sbk-my-hand'));
-	
-	if (q.length == 1) {
-		this.ajaxcall( "/sobektwoplayers/sobektwoplayers/playCharacter.html", { 
-			lock: true,
-			tile_id: q[0].tile.tile_id,
-		}, this,
-			function( result ) {},
-			function( is_error) {}
-		);
-	}
+	this.ajaxcall( "/sobektwoplayers/sobektwoplayers/playCharacter.html", { 
+		lock: true,
+		tile_id: tile_id,
+	}, this,
+		function( result ) {},
+		function( is_error) {}
+	);
 }
 
 function onSellSet() {

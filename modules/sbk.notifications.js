@@ -75,12 +75,13 @@ function handleTakeTile( notif ) {
 					if (playerId == this.player_id) {
 						tileElement.tile.location = 'corruption';
 						// Add character info
-						if (tileElement.tile.deck == 'character' && corruptionTilesObjects) {
+						if (['character', 'pharaoh'].includes(tileElement.tile.deck) && corruptionTilesObjects) {
 							for (let j in corruptionTilesObjects) {
 								let ct = corruptionTilesObjects[j];
 								if (ct.tile_id == tileElement.tile.tile_id) {
 									tileElement.tile.ability = ct.ability;
 									tileElement.tile.resource = ct.resource;
+									tileElement.tile.displayed_resource = ct.displayed_resource;
 									tileElement.tile.statue = ct.statue;
 								}
 							}
@@ -104,6 +105,12 @@ function handleTakeTile( notif ) {
 		const q = dojo.query('.sprite-pirogue', $('tiles-holder'));
 		for (let i = 0; i < q.length; i++) {
 			this.fadeOutAndDestroy( q[i], 500, 0 );
+		}
+	}
+
+	if (playerId != this.player_id) {
+		if (tile.deck == 'pharaoh') {
+			dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-back"></div> ', $('royal-corruption-holder-p'+playerId) );
 		}
 	}
 }
@@ -194,6 +201,10 @@ function handleDiscardTile( notif ) {
 			dojo.place( '<div class="sprite sprite-deben sprite-deben-back"></div> ', $('deben-holder-p'+playerId) );
 		}
 	}
+
+	if (notif.args.playedCharacted) {
+		dojo.place('<div class="sprite sprite-tile sprite-character-' + tile.ability.padStart(2, '0') + '"></div>', 'player-aid-played-characters');
+	}
 }
 
 function handleRemoveCorruption( notif ) {
@@ -229,6 +240,45 @@ function handleRevealDebens( notif ) {
 	}
 }
 
+function handleRevealRoyalCorruptions( notif ) {
+	const playerId = notif.args.player_id;
+	let royalCorruptions = notif.args.royalCorruptions;
+	if (royalCorruptions) {
+		$('royal-corruption-holder-p'+playerId).innerHTML = '';
+		for (let i in royalCorruptions) {
+			const d = royalCorruptions[i];
+			dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-'+d.value+'"></div> ', $('royal-corruption-holder-p'+playerId) );
+
+			$('corruption_pirogue_num_holder_p' + playerId).style.display = 'inline';
+			$('corruption_pirogue_num_p' + playerId).innerHTML = Number($('corruption_pirogue_num_p' + playerId).innerHTML) + Number(d.value);
+		}
+	}
+}
+
+function handleDiscardDeben( notif ) {
+	const playerId = notif.args.player_id;
+	const deben = notif.args.deben;
+
+	const sprites = Array.from(document.getElementById('deben-holder-p'+playerId).getElementsByClassName('sprite-deben'));
+	if (deben) {
+		sprites.find(div => div.classList.contains('sprite-deben-'+deben.value)).remove();
+	} else if (playerId != this.player_id) {
+		sprites[sprites.length - 1].remove();
+	}
+}
+
+function handleDiscardRoyalCorruption( notif ) {
+	const playerId = notif.args.player_id;
+	const royalCorruption = notif.args.royalCorruption;
+
+	const sprites = Array.from(document.getElementById('royal-corruption-holder-p'+playerId).getElementsByClassName('sprite-royal-corruption'));
+	if (royalCorruption) {
+		sprites.find(div => div.classList.contains('sprite-royal-corruption-'+royalCorruption.value)).remove();
+	} else if (playerId != this.player_id) {
+		sprites[sprites.length - 1].remove();
+	}
+}
+
 function handleDeben( notif ) {
 	const playerId = notif.args.player_id;
 	const deben = notif.args.deben;
@@ -244,6 +294,25 @@ function handleDeben( notif ) {
 	} else {
 		if (playerId != this.player_id) {
 			dojo.place( '<div class="sprite sprite-deben sprite-deben-back"></div> ', $('deben-holder-p'+playerId) );
+		}
+	}
+}
+
+function handleRoyalCorruption( notif ) {
+	const playerId = notif.args.player_id;
+	const royalCorruption = notif.args.royalCorruption;
+	let royalCorruptions = notif.args.royalCorruptions;
+	
+	if (royalCorruption) {
+		dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-'+royalCorruption.value+'"></div> ', $('royal-corruption-holder-p'+playerId) );
+	} else if (royalCorruptions != null) {
+		for (let i in royalCorruptions) {
+			const d = royalCorruptions[i];
+			dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-'+d.value+'"></div> ', $('royal-corruption-holder-p'+playerId) );
+		}
+	} else {
+		if (playerId != this.player_id) {
+			dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-back"></div> ', $('royal-corruption-holder-p'+playerId) );
 		}
 	}
 }
@@ -447,6 +516,7 @@ function handleHandUpdate( notif ) {
 	const numStarting = notif.args.hand_starting_size;
 	const numGood = notif.args.hand_good_size;
 	const numCharacter = notif.args.hand_character_size;
+	const numPharaoh = notif.args.hand_pharaoh_size;
 	
 	if (playerId != this.player_id) {
 		const handBreakdownDiv = $('hand-backs-holder-p'+playerId);
@@ -459,6 +529,9 @@ function handleHandUpdate( notif ) {
 		}
 		for (let i = 0; i < numCharacter; i++) {
 			handBreakdownDiv.innerHTML += `<div class="sprite sprite-tile sprite-character-back"></div>`;
+		}
+		for (let i = 0; i < numPharaoh; i++) {
+			handBreakdownDiv.innerHTML += `<div class="sprite sprite-tile sprite-pharaoh-back"></div>`;
 		}
 	}
 }
@@ -559,7 +632,7 @@ function handleGameEndScoring( notif ) {
 			}, 12 * x + (i - 1) * x);
 		}
 		
-		// Priogues
+		// Pirogues
 		{
 			const tds = dojo.query('#scoring-row-pirogue td');
 			const td = tds[i];
@@ -611,6 +684,10 @@ function setupNotifications( ) {
 	dojo.subscribe("drawTiles", handleDrawTiles.bind(this));
 	dojo.subscribe("deben", handleDeben.bind(this));
 	dojo.subscribe("revealDebens", handleRevealDebens.bind(this));
+	dojo.subscribe("discardDeben", handleDiscardDeben.bind(this));
+	dojo.subscribe("royalCorruption", handleRoyalCorruption.bind(this));
+	dojo.subscribe("revealRoyalCorruptions", handleRevealRoyalCorruptions.bind(this));
+	dojo.subscribe("discardRoyalCorruption", handleDiscardRoyalCorruption.bind(this));
 	dojo.subscribe("ankhDir", handleAnkhDir.bind(this));
 	dojo.subscribe("sold", handleSold.bind(this));
 	dojo.subscribe("updateScores", handleUpdateScores.bind(this));

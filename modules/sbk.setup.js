@@ -66,6 +66,12 @@ function onResize(animate = true) {
 
 function setup ( gamedatas ) {
 	console.log( "Starting game setup", gamedatas );
+	this.gamedatas = gamedatas;
+
+	if (!gamedatas.treasuresOfThePharaohExpansion) {
+		this.dontPreloadImage(`royal-corruption.png`);
+		this.dontPreloadImage(`tiles-treasures-of-the-pharaoh.jpg`);
+	}
 	
 	const numPlayers = Object.keys(gameui.gamedatas.players).length;
 	
@@ -95,6 +101,9 @@ function setup ( gamedatas ) {
 			for (let i = 0; i < po.hand_character_size; i++) {
 				handBreakdownDiv.innerHTML += `<div class="sprite sprite-tile sprite-character-back"></div>`;
 			}
+			for (let i = 0; i < po.hand_pharaoh_size; i++) {
+				handBreakdownDiv.innerHTML += `<div class="sprite sprite-tile sprite-pharaoh-back"></div>`;
+			}
 		}
 	
 		if (po.debens != null) {
@@ -106,6 +115,18 @@ function setup ( gamedatas ) {
 		} else {
 			for (let i = 0; i < po.deben_count; i++) {
 				dojo.place( '<div class="sprite sprite-deben sprite-deben-back"></div> ', $('deben-holder-p'+playerId) );
+			}
+		}
+	
+		if (po.royalCorruptions != null) {
+			for (let i in po.royalCorruptions) {
+				const royalCorruption = po.royalCorruptions[i];
+				
+				dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-'+royalCorruption.value+'"></div> ', $('royal-corruption-holder-p'+playerId) );
+			}
+		} else {
+			for (let i = 0; i < po.royalCorruption_count; i++) {
+				dojo.place( '<div class="sprite sprite-royal-corruption sprite-royal-corruption-back"></div> ', $('royal-corruption-holder-p'+playerId) );
 			}
 		}
 		
@@ -283,14 +304,20 @@ function setup ( gamedatas ) {
 	this.addTooltipToClass( 'tt-livestock', _( 'Livestock' ), "" );
 	this.addTooltipToClass( 'tt-wheat', _( 'Wheat' ), "" );
 	this.addTooltipToClass( 'tt-hand', _( 'Tiles in hand' ), "" );
-	this.addTooltipHtmlToClass( 'hand-backs-holder', `
+
+	let tilesInHandHtml = `
 		<div>${_( 'Tiles in hand' )}</div>
 		<div>
 			<div class="sprite-tile-holder"><div class="sprite sprite-tile sprite-starting-back"></div> ${_( 'Starting tile' )}</div>
 			<div class="sprite-tile-holder"><div class="sprite sprite-tile sprite-good-back"></div> ${_( 'Goods tile' )}</div>
-			<div class="sprite-tile-holder"><div class="sprite sprite-tile sprite-character-back"></div> ${_( 'Character tile' )}</div>
-		</div>
-	`, 0 );
+			<div class="sprite-tile-holder"><div class="sprite sprite-tile sprite-character-back"></div> ${_( 'Character tile' )}</div>`;
+	if (gamedatas.treasuresOfThePharaohExpansion) {
+		tilesInHandHtml += `<div class="sprite-tile-holder"><div class="sprite sprite-tile sprite-pharaoh-back"></div> ${_( 'Pharaoh tile' )}</div>`;
+	}
+
+	tilesInHandHtml += `	</div>`;
+
+	this.addTooltipHtmlToClass( 'hand-backs-holder', tilesInHandHtml, 0 );
 	//this.addTooltipToClass( 'hand-backs-holder', _( 'Tiles in hand' ), "" );
 	this.addTooltipToClass( 'deben-holder', _( 'Deben tokens' ), "" );
 	this.addTooltipToClass( 'pirogue-holder', _( 'Pirogue tokens' ), "" );
@@ -315,17 +342,20 @@ function setup ( gamedatas ) {
 	});
 	
 	// Add player aid buttons
-	const modalButtonHolder = dojo.place('<div style="text-align: center;"></div>', $('right-side-second-part'), 'before');
-	const playerAid = dojo.place('<a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="v_button">'+_('Characters reference')+'</a>', modalButtonHolder, 'first');
-	const pirogueAid = dojo.place('<a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="v_button">'+_('Pirogue reference')+'</a>', modalButtonHolder, 'first');
+	const modalButtonHolder = dojo.place('<div id="right-side-buttons" style="text-align: center;"></div>', $('right-side-second-part'), 'before');
+	const playerAid = dojo.place('<button type="button" class="action-button bgabutton bgabutton_blue">'+_('Characters reference')+'</button>', modalButtonHolder, 'first');
+	const pirogueAid = dojo.place('<button type="button" class="action-button bgabutton bgabutton_blue">'+_('Pirogue reference')+'</button>', modalButtonHolder, 'first');
 	dojo.connect(playerAid, "onclick", function() {
 		dojo.style($('sbk-modal'), {
 			display: 'block'
 		});
-		dojo.style($('player-aid-character'), {
-			display: 'block'
+		dojo.style($('player-aid-character-wrapper'), {
+			display: 'flex'
 		});
-		dojo.style($('player-aid-pirogue'), {
+		dojo.style($('player-aid-pirogue-wrapper'), {
+			display: 'none'
+		});
+		dojo.style($('player-aid-played-characters'), {
 			display: 'none'
 		});
 	});
@@ -333,19 +363,55 @@ function setup ( gamedatas ) {
 		dojo.style($('sbk-modal'), {
 			display: 'block'
 		});
-		dojo.style($('player-aid-character'), {
+		dojo.style($('player-aid-character-wrapper'), {
 			display: 'none'
 		});
-		dojo.style($('player-aid-pirogue'), {
-			display: 'block'
+		dojo.style($('player-aid-pirogue-wrapper'), {
+			display: 'flex'
+		});
+		dojo.style($('player-aid-played-characters'), {
+			display: 'none'
 		});
 	});
+
+	if (gamedatas.treasuresOfThePharaohExpansion) {
+		const playedCharactersAid = dojo.place('<button type="button" class="action-button bgabutton bgabutton_blue">'+_('Played characters')+'</button>', modalButtonHolder, 'last');
+		dojo.connect(playedCharactersAid, "onclick", function() {
+			dojo.style($('sbk-modal'), {
+				display: 'block'
+			});
+			dojo.style($('player-aid-character-wrapper'), {
+				display: 'none'
+			});
+			dojo.style($('player-aid-pirogue-wrapper'), {
+				display: 'none'
+			});
+			dojo.style($('player-aid-played-characters-wrapper'), {
+				display: 'flex'
+			});
+		});
+
+		if (gamedatas.playedCharacters.length) {
+			gamedatas.playedCharacters.forEach(character => dojo.place('<div class="sprite sprite-tile sprite-character-' + character.ability.padStart(2, '0') + '"></div>', 'player-aid-played-characters'));
+		} else {
+			$('player-aid-played-characters').innerHTML = '<div id="no-played-characters">' + _('No played character') + '</div>';
+		}
+	}
 	
 	const toTranslate = document.getElementsByClassName('sbk-to-localise');
 	for (let i = 0; i < toTranslate.length; i++) {
 		const e = toTranslate[i];
 		const english = dojo.attr(e, 'data-text');
 		e.innerHTML = _(english).replace('${num}', '');
+	}
+
+	if (gamedatas.treasuresOfThePharaohExpansion) {
+		dojo.style($('player-aid-character-pharaoh'), {
+			display: 'block'
+		});
+		dojo.style($('player-aid-pirogue-pharaoh'), {
+			display: 'block'
+		});
 	}
 	
 	this.setupNotifications();

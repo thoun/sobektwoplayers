@@ -97,7 +97,7 @@ function (dojo, declare, debounce, gamegui, setup, states, notifications, action
             } else if (tile.ability == 10) {
                desc = _("Your opponent must randomly discard 1 Deben token among the ones they have.");
             } else if (tile.ability == 11) {
-               desc = _("Place this token on one of your previously sold sets corresponding to one of the 2 types shown. It adds 2 Scarabs to this set at the end of the game during final score calculation. You may add this token to the ");
+               desc = _("Place this token on one of your previously sold sets corresponding to one of the 2 types shown. It adds 2 Scarabs to this set at the end of the game during final score calculation. You may add this token to the set that you just sold this turn.");
             }
 
             html = `${desc}`;

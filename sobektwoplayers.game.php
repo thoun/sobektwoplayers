@@ -1948,7 +1948,8 @@ class SobekTwoPlayers extends Table {
 		$can_sell = false;
 		$has_character = false;
 		$num_statues = 0;
-		$num_per_resource = array();
+		$num_per_resource = [];
+		$num_pharaoh = 0;
 		if (! isset($pirogue_board)) {
 			foreach ($hand as $t) {
 				if ($t["deck"] == "character") {
@@ -1956,7 +1957,7 @@ class SobekTwoPlayers extends Table {
 				}
 				if (+$t["statue"]) {
 					$num_statues++;
-				} if ($t["deck"] == "pharaoh") {
+				} else if ($t["deck"] == "pharaoh") {
 					$resources = explode('-or-', $t["resource"]);
 					foreach($resources as $r) {
 						if (! isset($num_per_resource[$r])) {
@@ -1964,6 +1965,7 @@ class SobekTwoPlayers extends Table {
 						}
 						$num_per_resource[$r]++;
 					}
+					$num_pharaoh++;
 				} else {
 					$r = $t["resource"];
 					if (! isset($num_per_resource[$r])) {
@@ -1978,6 +1980,22 @@ class SobekTwoPlayers extends Table {
 				if ($num + $num_statues >= 3) {
 					$can_sell = true;
 					break;
+				}
+			}
+
+			// in this special case, $can_sell = true but real type can't be determined
+			if ($can_sell == true && $num_statues == 2 && $num_pharaoh > 0 && count($hand) == $num_statues + $num_pharaoh) {
+				if ($num_pharaoh > 1) {
+					$commonResource = false;
+					foreach ($num_per_resource as $r => $num) {
+						if ($num >= 2) {
+							$commonResource = true;
+							break;
+						}
+					}
+					$can_sell = $commonResource;
+				} else {
+					$can_sell = false;
 				}
 			}
 		

@@ -15,8 +15,10 @@ trait DebugUtilTrait {
 		//RoyalCorruption::draw(2343492);
 		//RoyalCorruption::draw(2343493);
 		//RoyalCorruption::draw(2343493);
-		// UPDATE `tile` SET `location` = 'discard' where location in ('board', 'deck')
+    }
 
+    function debugEndGame() {
+        $this->DbQuery( "UPDATE `tile` SET `location` = 'discard' where location in ('board', 'deck')" );
     }
 
     function debugTakeAllDeck() {

@@ -67,7 +67,7 @@ function (dojo, declare, debounce, gamegui, setup, states, notifications, action
             token = 'token';
             coords = `tile-x-${tile.col} tile-y-${tile.row}`;
          }
-         return `<div data-tile-id="${tile.tile_id}" class="sprite sprite-tile ${token} ${spriteName} ${coords}" style="width: ${this.tileWidth}px;height: ${this.tileWidth}px"></div>`;
+         return `<div data-tile-id="${tile.tile_id}" class="sprite sprite-tile ${token} ${spriteName} ${coords}" data-deck="${tile.deck}" data-resource="${+tile.statue ? 'statue' : tile.displayed_resource}" data-direction="${tile.direction}" data-scarab="${(tile.scarabs > 0).toString()}" data-deben="${(tile.deben > 0).toString()}" style="width: ${this.tileWidth}px;height: ${this.tileWidth}px"></div>`;
       },
       addTooltipToPirogue: function(element, pirogue) {
          if (! element.id) {

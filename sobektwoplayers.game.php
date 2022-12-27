@@ -1590,19 +1590,9 @@ class SobekTwoPlayers extends Table {
 		} else if ($t['deck'] == 'pharaoh') {
 			return '<div class="'.$inline_class.' sprite sprite-tile sprite-pharaoh-back"></div>';
 		} else if ($t['statue'] == 1) {
-			return '<div class="'.$inline_class.' sprite sprite-tile sprite-statue-'.$t['direction'].'"></div>';
+			return '<div class="'.$inline_class.' sprite sprite-tile" data-resource="statue" data-direction="'.$t['direction'].'" data-scarab="false" data-deben="false"></div>';
 		} else {
-			if ($t['scarabs'] > 0) {
-				$s = 's';
-			} else {
-				$s = 'x';
-			}
-			if ($t['deben'] > 0) {
-				$d = 'd';
-			} else {
-				$d = 'x';
-			}
-			return "<div class=\"$inline_class sprite sprite-tile sprite-$t[resource]-$t[direction]-$s-$d\"></div>";
+			return "<div class=\"$inline_class sprite sprite-tile\" data-resource=\"$t[resource]\" data-direction=\"$t[direction]\" data-scarab=\"".json_encode($t['scarabs'] > 0)."\" data-deben=\"".json_encode($t['deben'] > 0)."\"></div>";
 		}
 		return '';
 	}

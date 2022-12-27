@@ -1,9 +1,10 @@
 <?php
 
-class Tile
-{
-	public static function setup($isExpansion) {
+class Tile {
+	public static function setup(bool $isExpansion) {
 		$sql = "INSERT INTO tile (resource, displayed_resource, deck, `statue`, direction, scarabs, deben, ability, location) VALUES ";
+
+		// v = vertical, h = horizontal, b = \ (backslash), f = / (forward slash?)
 		
 		// Starting
 		$starting = [

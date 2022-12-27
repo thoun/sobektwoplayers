@@ -584,7 +584,7 @@ function handleGameEndScoring( notif ) {
 			const soldSetsHolder = $('sbk-sets-p' + player_id);
 			const soldSets = dojo.query('.sold-set[data-resource="'+r+'"]', soldSetsHolder);
 			
-			setTimeout(function () {
+			setTimeout(() => {
 				if (soldSets.length == 0) {
 					// Put nothing
 					td.innerHTML = `-`;
@@ -594,7 +594,7 @@ function handleGameEndScoring( notif ) {
 					const tiles = dojo.query('.sprite-tile', soldSet);
 					for (let k = 0; k < tiles.length; k++) {
 						const tile = tiles[k];
-						td.innerHTML += '<div class="'+tile.className+' small-tile"></div> ';
+						td.innerHTML += '<div class="'+tile.className+' small-tile" data-resource="'+tile.dataset.resource+'" data-direction="'+tile.dataset.direction+'" data-deben="'+tile.dataset.deben+'" data-scarab="'+tile.dataset.scarab+'"></div> ';
 					}
 					
 					// Then the times
@@ -619,7 +619,7 @@ function handleGameEndScoring( notif ) {
 			
 			const debens = dojo.query(`#deben-holder-p${player_id} .sprite-deben`);
 			
-			setTimeout(function () {
+			setTimeout(() => {
 				if (debens.length == 0) {
 					td.innerHTML = `-`;
 				} else {
@@ -639,7 +639,7 @@ function handleGameEndScoring( notif ) {
 			
 			const debens = dojo.query(`#pirogue-holder-p${player_id} .sprite-pirogue`);
 			
-			setTimeout(function () {
+			setTimeout(() => {
 				if (debens.length == 0) {
 					td.innerHTML = `-`;
 				} else {

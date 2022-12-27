@@ -24,42 +24,42 @@
 					</tr>
 					<tr id="scoring-row-fish">
 						<td class="first-column">
-							<div class="sprite sprite-tile sprite-fish-h-x-x"></div>
+							<div class="sprite sprite-tile" data-resource="fish" data-direction="h" data-scarab="false"></div>
 						</td>
 						<td class="player-column">&nbsp;</td>
 						<td class="player-column">&nbsp;</td>
 					</tr>
 					<tr id="scoring-row-wheat">
 						<td class="first-column">
-							<div class="sprite sprite-tile sprite-wheat-h-x-x"></div>
+							<div class="sprite sprite-tile" data-resource="wheat" data-direction="h" data-scarab="false"></div>
 						</td>
 						<td class="player-column">&nbsp;</td>
 						<td class="player-column">&nbsp;</td>
 					</tr>
 					<tr id="scoring-row-livestock">
 						<td class="first-column">
-							<div class="sprite sprite-tile sprite-livestock-h-x-x"></div>
+							<div class="sprite sprite-tile" data-resource="livestock" data-direction="h" data-scarab="false"></div>
 						</td>
 						<td class="player-column">&nbsp;</td>
 						<td class="player-column">&nbsp;</td>
 					</tr>
 					<tr id="scoring-row-marble">
 						<td class="first-column">
-							<div class="sprite sprite-tile sprite-marble-h-x-x"></div>
+							<div class="sprite sprite-tile" data-resource="marble" data-direction="h" data-scarab="false"></div>
 						</td>
 						<td class="player-column">&nbsp;</td>
 						<td class="player-column">&nbsp;</td>
 					</tr>
 					<tr id="scoring-row-ivory">
 						<td class="first-column">
-							<div class="sprite sprite-tile sprite-ivory-h-x-x"></div>
+							<div class="sprite sprite-tile" data-resource="ivory" data-direction="h" data-scarab="false"></div>
 						</td>
 						<td class="player-column">&nbsp;</td>
 						<td class="player-column">&nbsp;</td>
 					</tr>
 					<tr id="scoring-row-ebony">
 						<td class="first-column">
-							<div class="sprite sprite-tile sprite-ebony-h-x-x"></div>
+							<div class="sprite sprite-tile" data-resource="ebony" data-direction="h" data-scarab="false"></div>
 						</td>
 						<td class="player-column">&nbsp;</td>
 						<td class="player-column">&nbsp;</td>
@@ -210,16 +210,16 @@ var jstpl_player_board = `<div id="cp_board_p\${id}" class="cp_board" data-playe
 <table class="table-row-2">
 <tbody>
 	<tr>
-		<td id="tt-ivory-\${id}" class="tt-ivory"><div class="sprite sprite-tile sprite-ivory-h-x-x"></div><span class="ivory_num">0 &times; 0</span></td>
-		<td id="tt-ebony-\${id}" class="tt-ebony"><div class="sprite sprite-tile sprite-ebony-h-x-x"></div><span class="ebony_num">0 &times; 0</span></td>
+		<td id="tt-ivory-\${id}" class="tt-ivory"><div class="sprite sprite-tile" data-resource="ivory" data-direction="h" data-scarab="false"></div><span class="ivory_num">0 &times; 0</span></td>
+		<td id="tt-ebony-\${id}" class="tt-ebony"><div class="sprite sprite-tile" data-resource="ebony" data-direction="h" data-scarab="false"></div><span class="ebony_num">0 &times; 0</span></td>
 	</tr>
 	<tr>
-		<td id="tt-marble-\${id}" class="tt-marble"><div class="sprite sprite-tile sprite-marble-h-x-x"></div><span class="marble_num">0 &times; 0</span></td>
-		<td id="tt-wheat-\${id}" class="tt-wheat"><div class="sprite sprite-tile sprite-wheat-h-x-x"></div><span class="wheat_num">0 &times; 0</span></td>
+		<td id="tt-marble-\${id}" class="tt-marble"><div class="sprite sprite-tile" data-resource="marble" data-direction="h" data-scarab="false"></div><span class="marble_num">0 &times; 0</span></td>
+		<td id="tt-wheat-\${id}" class="tt-wheat"><div class="sprite sprite-tile" data-resource="wheat" data-direction="h" data-scarab="false"></div><span class="wheat_num">0 &times; 0</span></td>
 	</tr>
 	<tr>
-		<td id="tt-fish-\${id}" class="tt-fish"><div class="sprite sprite-tile sprite-fish-h-x-x"></div><span class="fish_num">0 &times; 0</span></td>
-		<td id="tt-livestock-\${id}" class="tt-livestock"><div class="sprite sprite-tile sprite-livestock-h-x-x"></div><span class="livestock_num">0 &times; 0</span></td>
+		<td id="tt-fish-\${id}" class="tt-fish"><div class="sprite sprite-tile" data-resource="fish" data-direction="h" data-scarab="false"></div><span class="fish_num">0 &times; 0</span></td>
+		<td id="tt-livestock-\${id}" class="tt-livestock"><div class="sprite sprite-tile" data-resource="livestock" data-direction="h" data-scarab="false"></div><span class="livestock_num">0 &times; 0</span></td>
 	</tr>
 </tbody>
 </table>

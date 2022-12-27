@@ -36,13 +36,13 @@ class Tile {
 			
 			// Fish
 			[ 'fish', 'b', 0, 0 ],
-			[ 'fish', 'b', 1, 0 ],
-			[ 'fish', 'b', 0, 0 ],
 			[ 'fish', 'f', 0, 0 ],
-			[ 'fish', 'f', 0, 0 ],
-			[ 'fish', 'v', 1, 0 ],
-			[ 'fish', 'v', 0, 1 ],
 			[ 'fish', 'h', 1, 0 ],
+			[ 'fish', 'v', 1, 0 ],
+			[ 'fish', 'f', 1, 0 ],
+			[ 'fish', 'b', 1, 0 ],
+			[ 'fish', 'b', 1, 0 ],
+			[ 'fish', 'v', 0, 1 ],
 			
 			// Wheat
 			[ 'wheat', 'f', 0, 1 ],

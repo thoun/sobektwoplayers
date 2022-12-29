@@ -93,6 +93,33 @@ $directions: 'h', 'v', 'b', 'f';
     &[data-scarab="false"][data-deben="true"] { 
         background-position-x: #{8 * 100% / 10};
     }
+
+    &:not([data-direction]).sprite-statue-#{$direction} { 
+      background-position-y: 100%;
+      background-position-x: #{$i * 100% / 10};
+    }
+  }
+
+  &:not([data-direction]) {
+    @each $resource in $resources {
+      $y: index($resources, $resource) - 1;
+
+      @each $direction in $directions {
+        $i: index($directions, $direction) - 1;
+        &.sprite-#{$resource}-#{$direction}-x-x { 
+          background-position-y: #{$y * 100% / 6};
+          background-position-x: #{$i * 100% / 10};
+        }
+        &.sprite-#{$resource}-#{$direction}-s-x { 
+          background-position-y: #{$y * 100% / 6};
+          background-position-x: #{($i + 4) * 100% / 10};
+        }
+        &.sprite-#{$resource}-#{$direction}-x-d { 
+          background-position-y: #{$y * 100% / 6};
+          background-position-x: #{8 * 100% / 10};
+        }
+      }
+    }
   }
 
   &.sprite-character-01 {

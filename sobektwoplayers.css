@@ -113,6 +113,10 @@
 .sprite-tile[data-scarab=false][data-deben=true] {
   background-position-x: 80%;
 }
+.sprite-tile:not([data-direction]).sprite-statue-h {
+  background-position-y: 100%;
+  background-position-x: 0%;
+}
 .sprite-tile[data-direction=v][data-scarab=false] {
   background-position-x: 10%;
 }
@@ -121,6 +125,10 @@
 }
 .sprite-tile[data-scarab=false][data-deben=true] {
   background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-v {
+  background-position-y: 100%;
+  background-position-x: 10%;
 }
 .sprite-tile[data-direction=b][data-scarab=false] {
   background-position-x: 20%;
@@ -131,6 +139,10 @@
 .sprite-tile[data-scarab=false][data-deben=true] {
   background-position-x: 80%;
 }
+.sprite-tile:not([data-direction]).sprite-statue-b {
+  background-position-y: 100%;
+  background-position-x: 20%;
+}
 .sprite-tile[data-direction=f][data-scarab=false] {
   background-position-x: 30%;
 }
@@ -138,6 +150,346 @@
   background-position-x: 70%;
 }
 .sprite-tile[data-scarab=false][data-deben=true] {
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-f {
+  background-position-y: 100%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-h-x-x {
+  background-position-y: 0%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-h-s-x {
+  background-position-y: 0%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-h-x-d {
+  background-position-y: 0%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-v-x-x {
+  background-position-y: 0%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-v-s-x {
+  background-position-y: 0%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-v-x-d {
+  background-position-y: 0%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-b-x-x {
+  background-position-y: 0%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-b-s-x {
+  background-position-y: 0%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-b-x-d {
+  background-position-y: 0%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-f-x-x {
+  background-position-y: 0%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-f-s-x {
+  background-position-y: 0%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-livestock-f-x-d {
+  background-position-y: 0%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-h-x-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-h-s-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-h-x-d {
+  background-position-y: 16.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-v-x-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-v-s-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-v-x-d {
+  background-position-y: 16.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-b-x-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-b-s-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-b-x-d {
+  background-position-y: 16.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-f-x-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-f-s-x {
+  background-position-y: 16.6666666667%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-fish-f-x-d {
+  background-position-y: 16.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-h-x-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-h-s-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-h-x-d {
+  background-position-y: 33.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-v-x-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-v-s-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-v-x-d {
+  background-position-y: 33.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-b-x-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-b-s-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-b-x-d {
+  background-position-y: 33.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-f-x-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-f-s-x {
+  background-position-y: 33.3333333333%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-wheat-f-x-d {
+  background-position-y: 33.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-h-x-x {
+  background-position-y: 50%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-h-s-x {
+  background-position-y: 50%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-h-x-d {
+  background-position-y: 50%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-v-x-x {
+  background-position-y: 50%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-v-s-x {
+  background-position-y: 50%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-v-x-d {
+  background-position-y: 50%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-b-x-x {
+  background-position-y: 50%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-b-s-x {
+  background-position-y: 50%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-b-x-d {
+  background-position-y: 50%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-f-x-x {
+  background-position-y: 50%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-f-s-x {
+  background-position-y: 50%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-marble-f-x-d {
+  background-position-y: 50%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-h-x-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-h-s-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-h-x-d {
+  background-position-y: 66.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-v-x-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-v-s-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-v-x-d {
+  background-position-y: 66.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-b-x-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-b-s-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-b-x-d {
+  background-position-y: 66.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-f-x-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-f-s-x {
+  background-position-y: 66.6666666667%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-ebony-f-x-d {
+  background-position-y: 66.6666666667%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-h-x-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-h-s-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-h-x-d {
+  background-position-y: 83.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-v-x-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-v-s-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-v-x-d {
+  background-position-y: 83.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-b-x-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-b-s-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-b-x-d {
+  background-position-y: 83.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-f-x-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-f-s-x {
+  background-position-y: 83.3333333333%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-ivory-f-x-d {
+  background-position-y: 83.3333333333%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-h-x-x {
+  background-position-y: 100%;
+  background-position-x: 0%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-h-s-x {
+  background-position-y: 100%;
+  background-position-x: 40%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-h-x-d {
+  background-position-y: 100%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-v-x-x {
+  background-position-y: 100%;
+  background-position-x: 10%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-v-s-x {
+  background-position-y: 100%;
+  background-position-x: 50%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-v-x-d {
+  background-position-y: 100%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-b-x-x {
+  background-position-y: 100%;
+  background-position-x: 20%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-b-s-x {
+  background-position-y: 100%;
+  background-position-x: 60%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-b-x-d {
+  background-position-y: 100%;
+  background-position-x: 80%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-f-x-x {
+  background-position-y: 100%;
+  background-position-x: 30%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-f-s-x {
+  background-position-y: 100%;
+  background-position-x: 70%;
+}
+.sprite-tile:not([data-direction]).sprite-statue-f-x-d {
+  background-position-y: 100%;
   background-position-x: 80%;
 }
 .sprite-tile.sprite-character-01 {

@@ -391,6 +391,7 @@ class SobekTwoPlayers extends Table {
 					} else if (count($found) > 1) {
 						throw new BgaUserException( self::_("No clearly defined type") );
 					}
+					self::DbQuery('UPDATE tile SET `resource` = \''.($found[0]).'\' WHERE tile_id IN ('.join(',', $tile_ids).')');
 				}
 			} else {
 				if (count($resources) > 1) {

@@ -342,7 +342,7 @@ function setup ( gamedatas ) {
 	});
 	
 	// Add player aid buttons
-	const modalButtonHolder = dojo.place('<div id="right-side-buttons" style="text-align: center;"></div>', $('right-side-second-part'), 'before');
+	const modalButtonHolder = dojo.place('<div id="right-side-buttons" style="text-align: center;"></div>', $('right-side-first-part'));
 	const playerAid = dojo.place('<button type="button" class="action-button bgabutton bgabutton_blue">'+_('Characters reference')+'</button>', modalButtonHolder, 'first');
 	const pirogueAid = dojo.place('<button type="button" class="action-button bgabutton bgabutton_blue">'+_('Pirogue reference')+'</button>', modalButtonHolder, 'first');
 	dojo.connect(playerAid, "onclick", function() {
@@ -350,12 +350,12 @@ function setup ( gamedatas ) {
 			display: 'block'
 		});
 		dojo.style($('player-aid-character-wrapper'), {
-			display: 'flex'
+			display: 'flex', flexWrap: 'wrap'
 		});
 		dojo.style($('player-aid-pirogue-wrapper'), {
 			display: 'none'
 		});
-		dojo.style($('player-aid-played-characters'), {
+		dojo.style($('player-aid-played-characters-wrapper'), {
 			display: 'none'
 		});
 	});
@@ -367,9 +367,9 @@ function setup ( gamedatas ) {
 			display: 'none'
 		});
 		dojo.style($('player-aid-pirogue-wrapper'), {
-			display: 'flex'
+			display: 'flex', flexWrap: 'wrap'
 		});
-		dojo.style($('player-aid-played-characters'), {
+		dojo.style($('player-aid-played-characters-wrapper'), {
 			display: 'none'
 		});
 	});

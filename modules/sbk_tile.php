@@ -164,13 +164,13 @@ class Tile {
 		SobekTwoPlayers::DbQuery( "UPDATE tile SET location = 'hand' WHERE location = 'corruption' AND player_id = $player_id" );
 	}
 	
-	public static function getAtCoords($col, $row) {
-		$tile = SobekTwoPlayers::getObject( "SELECT * FROM tile WHERE location = 'board' AND col = $col AND row = $row" );
+	public static function getAtCoords($game, $col, $row) {
+		$tile = $game->getObject( "SELECT * FROM tile WHERE location = 'board' AND col = $col AND row = $row" );
 		return $tile;
 	}
 	
-	public static function get($tile_id) {
-		$tile = SobekTwoPlayers::getObject( "SELECT * FROM tile WHERE tile_id = $tile_id" );
+	public static function get($game, $tile_id) {
+		$tile = $game->getObject( "SELECT * FROM tile WHERE tile_id = $tile_id" );
 		return $tile;
 	}
 	

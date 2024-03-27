@@ -2,7 +2,7 @@
 
 class Pirogue
 {	
-	public static function setup($isExpansion) {
+	public static function setup($game, $isExpansion) {
 		$tokens = [
 			3, 3, // take extra turn
 			7, 7, // add 2 scarabs
@@ -38,44 +38,44 @@ class Pirogue
 			}
 		}
 		
-		SobekTwoPlayers::DbQuery( $sql );
+		$game->DbQuery( $sql );
 	}
 	
-	public static function getSlots() {
-		$all = SobekTwoPlayers::getObjectList( "SELECT * FROM pirogue WHERE location = 'slot'" );
+	public static function getSlots($game) {
+		$all = $game->getObjectList( "SELECT * FROM pirogue WHERE location = 'slot'" );
 		return $all;
 	}
 	
-	public static function getBoard() {
-		$all = SobekTwoPlayers::getObject( "SELECT * FROM pirogue WHERE location = 'board' LIMIT 1" );
+	public static function getBoard($game) {
+		$all = $game->getObject( "SELECT * FROM pirogue WHERE location = 'board' LIMIT 1" );
 		return $all;
 	}
 	
-	public static function getSoldSets($player_id) {
-		$all = SobekTwoPlayers::getObjectList( "SELECT * FROM pirogue WHERE location = 'soldset' AND player_id = $player_id" );
+	public static function getSoldSets($game, $player_id) {
+		$all = $game->getObjectList( "SELECT * FROM pirogue WHERE location = 'soldset' AND player_id = $player_id" );
 		return $all;
 	}
 	
-	public static function getSlot($slot) {
-		return SobekTwoPlayers::getObject( "SELECT * FROM pirogue WHERE location = 'slot' AND slot = $slot" );
+	public static function getSlot($game, $slot) {
+		return $game->getObject( "SELECT * FROM pirogue WHERE location = 'slot' AND slot = $slot" );
 	}
 	
-	public static function getOwned($player_id) {
-		return SobekTwoPlayers::getObjectList( "SELECT * FROM pirogue WHERE location = 'player' AND player_id = $player_id" );
+	public static function getOwned($game, $player_id) {
+		return $game->getObjectList( "SELECT * FROM pirogue WHERE location = 'player' AND player_id = $player_id" );
 	}
 	
-	public static function get($pirogue_id) {
-		return SobekTwoPlayers::getObject( "SELECT * FROM pirogue WHERE pirogue_id = $pirogue_id" );
+	public static function get($game, $pirogue_id) {
+		return $game->getObject( "SELECT * FROM pirogue WHERE pirogue_id = $pirogue_id" );
 	}
 	
-	public static function getBag() {
-		$all = SobekTwoPlayers::getObjectList( "SELECT * FROM pirogue WHERE location = 'bag'" );
+	public static function getBag($game) {
+		$all = $game->getObjectList( "SELECT * FROM pirogue WHERE location = 'bag'" );
 		shuffle($all);
 		return $all;
 	}
 	
-	public static function getAll() {
-		$all = SobekTwoPlayers::getObjectList( "SELECT * FROM pirogue WHERE location != 'bag'" );
+	public static function getAll($game) {
+		$all = $game->getObjectList( "SELECT * FROM pirogue WHERE location != 'bag'" );
 		return $all;
 	}
 }

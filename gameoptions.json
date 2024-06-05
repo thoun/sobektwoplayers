@@ -1,0 +1,16 @@
+{
+    "100": {
+        "name": "Expansion",
+        "values": {
+            "1": {
+                "name": "Base game"
+            },
+            "2": {
+                "name": "Treasures of the Pharaoh",
+                "tmdisplay": "Treasures of the Pharaoh expansion"
+            }
+        },
+        "default": 1,
+        "level": "major"
+    }
+}

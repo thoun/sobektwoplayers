@@ -4,19 +4,18 @@ function onResize(animate = true) {
 	// Based on the size of the game-holder, set the correct position/rotation of the pad
 	// TODO : There should be a minimum height
 	// If this is negative, or tiny, then fill up all space instead?
-	const holderRect = $('page-content').getBoundingClientRect();
-	const preRect = $('sbk-game-holder').getBoundingClientRect();
-	let targetHeight = (window.innerHeight - (window.pageYOffset + preRect.top)) - 10;
+	const pre = $('sbk-game-holder');
+	let targetHeight = (window.innerHeight - (window.pageYOffset + pre.getBoundingClientRect().top)) - 10;
 	const minimumHeight = 400;
 	if (targetHeight < minimumHeight) {
 		//alert(targetHeight + ' < 0: ' + holderRect.height);
-		targetHeight = Math.max(minimumHeight, holderRect.height);
+		targetHeight = Math.max(minimumHeight, $('page-content').offsetHeight);
 	}
 	
 	let targetWidth = targetHeight * (2244/1955);
 	let totalWidth = targetWidth + (targetHeight * 0.128);
-	if (totalWidth > preRect.width) {
-		targetWidth = preRect.width - (targetHeight * 0.128);
+	if (totalWidth > pre.offsetWidth) {
+		targetWidth = pre.offsetWidth - (targetHeight * 0.128);
 		targetHeight = targetWidth / (2244/1955);
 	}
 	
@@ -27,7 +26,7 @@ function onResize(animate = true) {
 	const tileWidth = targetHeight * 0.131;
 	
 	dojo.removeClass($('sbk-game-holder'), 'layout-wide layout-narrow');
-	if (preRect.width - targetWidth > 400) {
+	if (pre.offsetWidth - targetWidth > 400) {
 		dojo.addClass($('sbk-game-holder'), 'layout-wide');
 	} else {
 		dojo.addClass($('sbk-game-holder'), 'layout-narrow');
